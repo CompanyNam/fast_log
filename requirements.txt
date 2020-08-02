@@ -9,4 +9,4 @@ Markdown
 bleach
 psycopg2
 whitenoise
-rest_framework
+
