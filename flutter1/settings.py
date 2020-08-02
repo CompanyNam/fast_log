@@ -90,7 +90,7 @@ DATABASE_URL='postgres://thpavwyswtjqes:b2c76c8d78c4f15c8c8734015fb09ac8017d4310
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL')
+        default=DATABASE_URL
     )
 }
 
