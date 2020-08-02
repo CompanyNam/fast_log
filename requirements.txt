@@ -9,4 +9,5 @@ Markdown
 bleach
 psycopg2
 whitenoise
+djangorestframework
 
