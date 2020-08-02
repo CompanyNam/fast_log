@@ -28,7 +28,7 @@ SECRET_KEY = '1x68@!b5-1a-^)3r6@1tx72ig1k4h2k^14_w4e*j&1edt=-1!$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fastlogis.herokuapp.com']
 
 
 # Application definition
