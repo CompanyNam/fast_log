@@ -1,1 +1,1 @@
-web: gunicorn bootcamp.wsgi --log-file -s
+web: gunicorn flutter1.wsgi --log-file -s
