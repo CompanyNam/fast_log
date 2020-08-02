@@ -82,12 +82,13 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
+DATABASE_URL='postgres://thpavwyswtjqes:b2c76c8d78c4f15c8c8734015fb09ac8017d431074dcf032c40a5a50d22ac02a@ec2-107-22-7-9.compute-1.amazonaws.com:5432/d5bkd1kjus7m0g'
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL')
+    )
 }
 
 
