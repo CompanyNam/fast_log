@@ -12,7 +12,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class BookSerializers(serializers.HyperlinkedModelSerializer):
     class Meta:
         model=booking
-        fields = '__all__'
+        fields = fields=[
+            'booker',
+            'endPlace',
+            'initialPlace',
+            'id',
+            'price',
+            'distance',
+        ]
 
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ModelViewSet):
@@ -22,6 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class BookViewSet(viewsets.ModelViewSet):
     queryset = booking.objects.all()
     serializer_class = BookSerializers
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
