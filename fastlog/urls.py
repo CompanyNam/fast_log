@@ -1,84 +1,126 @@
 from django.urls import path, include
 from django.contrib.auth.models import User
-from rest_framework import routers, serializers, viewsets
-from .models import booking
+from rest_framework import routers, serializers,viewsets
+from rest_framework import mixins
+from rest_framework import generics
+from rest_framework.response import Response
 from django.conf.urls import url
 from rest_framework.generics import ListAPIView,RetrieveAPIView,DestroyAPIView,UpdateAPIView,CreateAPIView
 from rest_framework.permissions import AllowAny
+from .models import *
+from rest_framework.serializers import ModelSerializer
 # Serializers define the API representation.
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['url', 'username', 'email', 'is_staff']
 
-class BookSerializers(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model=booking
-        fields = fields=[
-            'booker',
-            'endPlace',
-            'initialPlace',
-            'id',
-            'price',
-            'distance',
-        ]
 
-class BookModelCreateSerializer(ModelSerializer):
-    class Meta:
-        model=booking
-        fields = fields=[
-            'booker',
-            'endPlace',
-            'initialPlace',
-            
-            'price',
-            'distance',
-        ]
+
+
+# class AlbumSerializers(serializers.ModelSerializer):
+#     album=BookModelCreateSerializer(many=True)
+#     class Meta:
+#         model=Album
+#         fields="__all__"
 
 # ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
-class BookViewSet(viewsets.ModelViewSet):
-    queryset = booking.objects.all()
-    serializer_class = BookSerializers
-class BookDetailAPIView(RetrieveAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookModelCreateSerializer
+class BookerUserForNested(ModelSerializer):
+    class Meta:
+        model=BookerUser
+        fields=[
+            'first_name',
+            'last_name',
+        ]
+class DriverUserForNested(ModelSerializer):
+    class Meta:
+        model=DriverUser
+        fields=[
+            'first_name',
+            'last_name',
+            'lat',
+            'len',
+        ]
+class OrderCreateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=Order
+        fields='__all__'
+
+class OrderSerializers(serializers.ModelSerializer):
+    driver_user=DriverUserForNested()
+    booker_user=BookerUserForNested()
+    class Meta:
+        model=Order
+        fields="__all__"
+
+class OrderListAPIView(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializers
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     return self.list(request, *args, **kwargs)
+
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+
+# class AlbumViewSet(viewsets.ModelViewSet):
+#     queryset = Album.objects.all()
+#     serializer_class = AlbumSerializers
+class OrderDetailAPIView(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializers
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 
-class BookUpdateAPIView(UpdateAPIView):
+
+class OrderUpdateAPIView(UpdateAPIView):
 
 
-    queryset = Book.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
-    serializer_class = BookModelCreateSerializer
+    queryset = Order.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = OrderCreateSerializers
+    def get(self, request, pk):
+        return Response("ok")
+    
 
 
-class BookDeleteAPIView(DestroyAPIView):
-    queryset = Book.objects.all()
-    serializer_class =BookModelCreateSerializer
-    permission_classes = [IsAdminUser]
+class OrderDeleteAPIView(DestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class =OrderCreateSerializers
+    permission_classes = [AllowAny]
+    def get(self, request, pk):
+        return Response("ok")
 
-class BookCreateAPIView(CreateAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookModelCreateSerializer
-    permission_classes = [IsAdminUser]
+class OrderCreateAPIView(CreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderCreateSerializers
+    permission_classes = [AllowAny]
+    def get(self, request):
+        return Response("ok")
+
+
 
 # Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'booking',BookViewSet)
 
+# router.register(r'books', BookViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    url(r'^(?P<pk>\d+)/detail/$', BookDetailAPIView.as_view() , name="docdetail"),
-    url(r'^(?P<pk>\d+)/update/$', BookUpdateAPIView.as_view() , name="docupdate"),
-    url(r'^(?P<pk>\d+)/delete/$', BookDeleteAPIView.as_view() , name="docdel"),
-    url(r'^create/$', BookCreateAPIView.as_view() , name="doccre"),
+    url(r'^orders/$', OrderListAPIView.as_view() , name="order_list"),
+    url(r'^orders/(?P<pk>\d+)/detail/$', OrderDetailAPIView.as_view() , name="order_detail"),
+    url(r'^orders/(?P<pk>\d+)/update/$', OrderUpdateAPIView.as_view() , name="order_update"),
+    url(r'^orders/(?P<pk>\d+)/delete/$', OrderDeleteAPIView.as_view() , name="order_delete"),
+    url(r'^orders/create/$', OrderCreateAPIView.as_view() , name="order_create"),
+    
+
     
 ]
